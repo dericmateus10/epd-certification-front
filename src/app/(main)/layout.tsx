@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ProcessResponse } from '@/types/process.types';
+import { useProcesses } from '@/hooks/useProcesses';
 import Link from 'next/link'; // Importe o componente Link
 
 // Componente de Carregamento (Spinner)
@@ -16,29 +17,50 @@ function LoadingSpinner() {
 }
 
 // Componente do Menu Lateral
-function Sidebar({ processes }: { processes: ProcessResponse[] }) {
+// Componente do Menu Lateral (Sidebar)
+// Componente do Menu Lateral (Sidebar) - Versão Melhorada
+function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoading: boolean }) {
   return (
-    <aside className="w-64 bg-gray-800 text-white p-4 flex flex-col">
-      <h2 className="text-xl font-bold mb-4">Etapas de Manufatura</h2>
-      <nav className="flex-1">
-        <ul>
-          {processes.map((process) => (
-            <li key={process.id} className="mb-2">
-              <a href="#" className="hover:text-gray-300">
-                {process.stepNumber}. {process.name}
-              </a>
-            </li>
-          ))}
-        </ul>
+    <aside className="w-72 bg-gray-900 text-white p-4 flex flex-col shadow-lg">
+      <h2 className="text-lg font-semibold mb-4 px-2">Manufacturing Steps</h2>
+      <nav className="flex-1 space-y-2">
+        {isLoading ? (
+          <p className="text-sm text-gray-400 px-2">Loading steps...</p>
+        ) : (
+          <ul>
+            {processes.map((process) => (
+              <li key={process.id}>
+                {/* MUDANÇA AQUI: Aplicando estilos de botão.
+                  - w-full: Ocupa toda a largura
+                  - block: Para que o padding funcione corretamente
+                  - p-2: Padding interno
+                  - rounded-md: Bordas arredondadas
+                  - hover:bg-gray-700: Cor de fundo ao passar o mouse
+                  - transition-colors: Efeito de transição suave
+                */}
+                <Link
+                  href={`/processes/${process.id}`} // Futuramente, o link será dinâmico
+                  className="w-full block p-2 rounded-md hover:bg-gray-700 transition-colors text-sm"
+                >
+                  {/* Removemos o underline e o espaço extra, e formatamos o texto */}
+                  {`${process.stepNumber}. ${process.name.replace(/_/g, ' ')}`}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </nav>
       
-      {/* Adicionando o menu de gerenciamento */}
+      {/* Menu de gerenciamento */}
       <div>
-        <h3 className="text-lg font-semibold mb-2 border-t border-gray-700 pt-4">Gerenciamento</h3>
+        <h3 className="text-lg font-semibold mb-2 border-t border-gray-600 pt-4 px-2">Management</h3>
         <ul>
-          <li className="mb-2">
-            <Link href="/products" className="hover:text-gray-300">
-              Produtos
+          <li>
+            <Link 
+              href="/products" 
+              className="w-full block p-2 rounded-md hover:bg-gray-700 transition-colors text-sm"
+            >
+              Products
             </Link>
           </li>
         </ul>
@@ -48,44 +70,28 @@ function Sidebar({ processes }: { processes: ProcessResponse[] }) {
 }
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
-  const [processes, setProcesses] = useState<ProcessResponse[]>([]);
+  
+  // 2. Use o hook para buscar os processos e seu estado de carregamento
+  const { processes, loading: areProcessesLoading } = useProcesses();
 
   useEffect(() => {
-    // 1. Lógica de Proteção de Rota
-    if (!isLoading && !isAuthenticated) {
+    if (!isAuthLoading && !isAuthenticated) {
       router.push('/login');
     }
+    // A lógica de fetchProcesses foi movida para dentro do hook, então não é mais necessária aqui.
+  }, [isAuthLoading, isAuthenticated, router]);
 
-    // 2. Busca dos dados para o menu
-    async function fetchProcesses() {
-      // ATENÇÃO: Por enquanto, vamos usar dados mocados (falsos).
-      // A chamada real à API será feita em um hook customizado mais tarde.
-      const mockProcesses: ProcessResponse[] = [
-        { id: '1', stepNumber: 1, name: 'Extrusão', createdAt: '', updatedAt: '' },
-        { id: '2', stepNumber: 2, name: 'Laminação', createdAt: '', updatedAt: '' },
-        { id: '3', stepNumber: 3, name: 'Corte', createdAt: '', updatedAt: '' },
-        { id: '4', stepNumber: 4, name: 'Acabamento', createdAt: '', updatedAt: '' },
-      ];
-      setProcesses(mockProcesses);
-    }
-
-    if (isAuthenticated) {
-      fetchProcesses();
-    }
-  }, [isLoading, isAuthenticated, router]);
-
-  // Enquanto verifica a autenticação, mostra um spinner
-  if (isLoading) {
+  if (isAuthLoading) {
     return <LoadingSpinner />;
   }
 
-  // Se estiver autenticado, mostra o layout principal
   if (isAuthenticated) {
     return (
       <div className="flex h-screen">
-        <Sidebar processes={processes} />
+        {/* 3. Passe os dados reais e o estado de carregamento para o Sidebar */}
+        <Sidebar processes={processes} isLoading={areProcessesLoading} />
         <main className="flex-1 p-8 bg-gray-100 overflow-y-auto">
           {children}
         </main>
@@ -93,6 +99,5 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     );
   }
 
-  // Retorna nulo enquanto redireciona para evitar piscar de tela
   return null;
 }

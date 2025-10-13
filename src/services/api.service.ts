@@ -1,6 +1,7 @@
 import { AuthResponseDto, LoginDto, UserResponseDto } from "@/types/auth.types";
 import { ProductResponse, UpdateProductDto } from "@/types/product.types";
 import { PaginatedResponse } from "@/types/api.types"; 
+import { ProcessResponse } from "@/types/process.types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
@@ -78,6 +79,14 @@ async function apiRequest<T>(endpoint: string, options: ApiRequestOptions = {}):
 
   return response.json() as Promise<T>;
 }
+
+// --- Serviço de Processos ---
+export const processService = {
+  // MUDANÇA AQUI: Atualize o tipo de retorno
+  getAll: (): Promise<PaginatedResponse<ProcessResponse>> => {
+    return apiRequest('/processes?limit=100');
+  },
+};
 
 // --- Serviço de Autenticação ---
 export const authService = {
