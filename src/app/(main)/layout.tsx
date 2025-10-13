@@ -16,13 +16,18 @@ function LoadingSpinner() {
   );
 }
 
-// Componente do Menu Lateral
-// Componente do Menu Lateral (Sidebar)
-// Componente do Menu Lateral (Sidebar) - Versão Melhorada
 function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoading: boolean }) {
   return (
     <aside className="w-72 bg-gray-900 text-white p-4 flex flex-col shadow-lg">
+      {/* 1. Cabeçalho de Branding */}
+      <div className="px-2 pb-4 mb-4 border-b border-gray-600">
+        <h1 className="text-xl font-bold">EPD Certification</h1>
+      </div>
+
+      {/* 2. Título da Seção de Navegação */}
       <h2 className="text-lg font-semibold mb-4 px-2">Manufacturing Steps</h2>
+      
+      {/* 3. Lista de Navegação Principal */}
       <nav className="flex-1 space-y-2">
         {isLoading ? (
           <p className="text-sm text-gray-400 px-2">Loading steps...</p>
@@ -30,19 +35,12 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
           <ul>
             {processes.map((process) => (
               <li key={process.id}>
-                {/* MUDANÇA AQUI: Aplicando estilos de botão.
-                  - w-full: Ocupa toda a largura
-                  - block: Para que o padding funcione corretamente
-                  - p-2: Padding interno
-                  - rounded-md: Bordas arredondadas
-                  - hover:bg-gray-700: Cor de fundo ao passar o mouse
-                  - transition-colors: Efeito de transição suave
-                */}
                 <Link
-                  href={`/processes/${process.id}`} // Futuramente, o link será dinâmico
+                  // O href aponta para a rota dinâmica usando o ID do processo
+                  href={`/processes/${process.id}`}
                   className="w-full block p-2 rounded-md hover:bg-gray-700 transition-colors text-sm"
                 >
-                  {/* Removemos o underline e o espaço extra, e formatamos o texto */}
+                  {/* O texto é formatado para remover underscores */}
                   {`${process.stepNumber}. ${process.name.replace(/_/g, ' ')}`}
                 </Link>
               </li>
@@ -51,7 +49,7 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
         )}
       </nav>
       
-      {/* Menu de gerenciamento */}
+      {/* 4. Seção de Gerenciamento */}
       <div>
         <h3 className="text-lg font-semibold mb-2 border-t border-gray-600 pt-4 px-2">Management</h3>
         <ul>

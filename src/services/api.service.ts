@@ -86,6 +86,10 @@ export const processService = {
   getAll: (): Promise<PaginatedResponse<ProcessResponse>> => {
     return apiRequest('/processes?limit=100');
   },
+
+  getById: (id: string): Promise<ProcessResponse> => {
+    return apiRequest(`/processes/${id}`);
+  },
 };
 
 // --- Serviço de Autenticação ---
