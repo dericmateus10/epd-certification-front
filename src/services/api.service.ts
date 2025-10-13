@@ -1,4 +1,6 @@
 import { AuthResponseDto, LoginDto, UserResponseDto } from "@/types/auth.types";
+import { CreateProductDto, ProductResponse, UpdateProductDto } from "@/types/product.types";
+import { PaginatedResponse } from "@/types/api.types"; 
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
@@ -52,5 +54,30 @@ export const authService = {
   },
   getMe: (): Promise<UserResponseDto> => {
     return apiRequest('/auth/me');
+  },
+};
+
+// --- Serviço de Produtos ---
+export const productService = {
+  getAll: (): Promise<PaginatedResponse<ProductResponse>> => {
+    return apiRequest('/products');
+  },
+  // MUDANÇA AQUI: Substituímos a função 'create'
+  importByCode: (productCode: string): Promise<ProductResponse> => {
+    // Faz um POST para a nova rota, sem corpo (body)
+    return apiRequest(`/import/product/${productCode}`, {
+      method: 'POST', 
+    });
+  },
+  update: (id: string, data: UpdateProductDto): Promise<ProductResponse> => {
+    return apiRequest(`/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+  delete: (id: string): Promise<void> => {
+    return apiRequest(`/products/${id}`, {
+      method: 'DELETE',
+    });
   },
 };
