@@ -58,7 +58,7 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
               href="/products" 
               className="w-full block p-2 rounded-md hover:bg-gray-700 transition-colors text-sm"
             >
-              Products
+              Materials
             </Link>
           </li>
         </ul>

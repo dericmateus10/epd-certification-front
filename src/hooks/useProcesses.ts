@@ -12,13 +12,13 @@ export function useProcesses() {
   const fetchProcesses = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await processService.getAll();
-      const sortedData = response.data.sort((a, b) => a.stepNumber - b.stepNumber);
-      setProcesses(sortedData);
+      const data = await processService.getAll();
+      setProcesses(data.data);
     } catch (error) {
-      toast.error('Erro ao buscar as etapas do processo', {
+      toast.error('Error fetching process steps', {
         description: error instanceof Error ? error.message : String(error),
       });
+      setProcesses([]);
     } finally {
       setLoading(false);
     }

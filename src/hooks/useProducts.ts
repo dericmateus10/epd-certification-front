@@ -17,7 +17,7 @@ export function useProducts() {
       const response = await productService.getAll(); // 2. Faz UMA chamada à API
       setProducts(response.data); // 3. Atualiza o estado com os dados corretos
     } catch (error) {
-      toast.error('Erro ao buscar produtos', {
+      toast.error('Error fetching materials', {
         description: error instanceof Error ? error.message : String(error),
       });
     } finally {
@@ -35,11 +35,11 @@ export function useProducts() {
       // Esta linha está correta e agora vai funcionar de forma previsível
       setProducts((prev) => [...prev, newProduct]);
       
-      toast.success('Produto importado com sucesso!', {
-        description: `O produto "${newProduct.productDescription}" foi adicionado.`,
+      toast.success('Material imported successfully!', {
+        description: `The product "${newProduct.productDescription}" has been added.`,
       });
     } catch (error) {
-      toast.error('Erro ao importar produto', {
+      toast.error('Error importing material', {
         description: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -52,9 +52,9 @@ export function useProducts() {
       setProducts((prev) => 
         prev.map((p) => (p.id === id ? updatedProduct : p))
       );
-      toast.success('Produto atualizado com sucesso!');
+      toast.success('Material updated successfully!');
     } catch (error) {
-      toast.error('Erro ao atualizar produto', {
+      toast.error('Error updating material', {
         description: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -65,9 +65,9 @@ export function useProducts() {
     try {
       await productService.delete(id);
       setProducts((prev) => prev.filter((p) => p.id !== id));
-      toast.success('Produto deletado com sucesso!');
+      toast.success('Material deleted successfully!');
     } catch (error) {
-      toast.error('Erro ao deletar produto', {
+      toast.error('Error deleting material', {
         description: error instanceof Error ? error.message : String(error),
       });
     }

@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(userData);
         } catch (error) {
           // Se o token for inválido, o getMe() falha. Limpamos o token.
-          console.error("Sessão inválida:", error);
+          console.error("Invalid session:", error);
           localStorage.removeItem('epd_auth_token');
           setUser(null);
         }
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = await authService.getMe();
       setUser(userData);
     } catch (error) {
-      console.error("Falha no login:", error);
+      console.error("Login failed:", error);
       // Re-lança o erro para que o formulário de login possa tratá-lo (ex: mostrar um toast)
       throw error;
     }
@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }

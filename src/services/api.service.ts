@@ -70,7 +70,7 @@ async function apiRequest<T>(endpoint: string, options: ApiRequestOptions = {}):
     const errorMessage = Array.isArray(errorData.message)
       ? errorData.message.join(', ')
       : errorData.message;
-    throw new Error(errorMessage || 'Ocorreu um erro na requisição.');
+    throw new Error(errorMessage || 'An error occurred while making the request.');
   }
 
   if (response.status === 204 || response.headers.get('content-length') === '0') {

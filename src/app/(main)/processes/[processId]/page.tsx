@@ -14,14 +14,13 @@ export default function ProcessDetailPage() {
 
   // O estado de carregamento é exibido enquanto os dados são buscados
   if (loading) {
-    return <div>Carregando detalhes do processo...</div>;
+    return <div>Loading process details...</div>;
   }
 
-  // Se, após carregar, o processo não for encontrado (ex: ID inválido), mostra um erro
   if (!process) {
     return (
       <div>
-        <PageHeader title="Erro" subtitle="Processo não encontrado." />
+        <PageHeader title="Error" subtitle="Process not found." />
       </div>
     );
   }
@@ -36,7 +35,7 @@ export default function ProcessDetailPage() {
       />
 
       <div className="p-6 border rounded-lg bg-white shadow-sm">
-        <p>Aqui virá o dashboard completo do processo...</p>
+        <p>The complete process dashboard will be added here...</p>
         <p className="font-mono mt-4 text-xs bg-gray-100 p-2 rounded">ID: {process.id}</p>
       </div>
     </div>

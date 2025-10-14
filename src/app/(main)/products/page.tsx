@@ -49,14 +49,14 @@ export default function ProductsPage() {
     try {
       const componentCodes = await productService.getDistinctComponentCodes(product.productCode);
       if (componentCodes.length === 0) {
-        toast.info('Nenhum componente encontrado para este produto.');
+        toast.info('No components found for this product.');
         return;
       }
       const textToCopy = componentCodes.join('\n');
       await navigator.clipboard.writeText(textToCopy);
-      toast.success('Lista de componentes copiada para a área de transferência!');
+      toast.success('Component list copied to clipboard!');
     } catch (error) {
-      toast.error('Erro ao buscar componentes', {
+      toast.error('Error fetching components', {
         description: error instanceof Error ? error.message : String(error),
       });
     }
@@ -71,11 +71,11 @@ export default function ProductsPage() {
     const file = event.target.files?.[0];
     if (file && selectedProductForImport) {
       try {
-        toast.info('Importando arquivo de roteiro...');
+        toast.info('Importing routing file...');
         await productService.importRouting(selectedProductForImport.productCode, file);
-        toast.success('Roteiro importado com sucesso!');
+        toast.success('Routing imported successfully!');
       } catch (error) {
-        toast.error('Erro ao importar roteiro', {
+        toast.error('Error importing routing', {
           description: error instanceof Error ? error.message : String(error),
         });
       } finally {
@@ -86,7 +86,7 @@ export default function ProductsPage() {
   };
 
   if (loading) {
-    return <div>Carregando produtos...</div>;
+    return <div>Loading materials...</div>;
   }
 
   return (
@@ -100,17 +100,17 @@ export default function ProductsPage() {
       />
       
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gerenciamento de Produtos</h1>
-        <Button onClick={handleOpenCreateModal}>Adicionar Produto</Button>
+        <h1 className="text-2xl font-bold">Material Management</h1>
+        <Button onClick={handleOpenCreateModal}>Add Material</Button>
       </div>
 
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Código</TableHead>
-              <TableHead>Nome / Descrição</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <TableHead>Code</TableHead>
+              <TableHead>Name / Description</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -122,23 +122,23 @@ export default function ProductsPage() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Abrir menu</span>
+                        <span className="sr-only">Open menu</span>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => handleOpenEditModal(product)}>
-                        Editar
+                        Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleCopyComponents(product)}>
-                        Copiar Componentes
+                        Copy Components
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleImportRoutingClick(product)}>
-                        Importar Roteiro
+                         Import Routing
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleDeleteClick(product)}>
-                        Excluir
+                        Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -153,7 +153,7 @@ export default function ProductsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {productToEdit ? 'Editar Produto' : 'Adicionar Novo Produto'}
+              {productToEdit ? 'Edit Material' : 'Add New Material'}
             </DialogTitle>
           </DialogHeader>
           <ProductForm 
@@ -168,15 +168,15 @@ export default function ProductsPage() {
       <AlertDialog open={!!productToDelete} onOpenChange={(isOpen) => !isOpen && setProductToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação irá deletar permanentemente o produto
+              This action cannot be undone. This will permanently delete the material
               <span className="font-bold"> {productToDelete?.productDescription}</span>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Confirmar</AlertDialogAction>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Confirm</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

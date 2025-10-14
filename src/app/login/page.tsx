@@ -21,10 +21,10 @@ import { toast } from "sonner";
 // 1. Definindo o schema de validação com Zod
 const formSchema = z.object({
   email: z.string().email({
-    message: "Por favor, insira um endereço de e-mail válido.",
+    message: "Please enter a valid email address.",
   }),
   password: z.string().min(6, {
-    message: "A senha deve ter no mínimo 6 caracteres.",
+    message: "Password must be at least 6 characters long.",
   }),
 });
 
@@ -45,12 +45,12 @@ export default function LoginPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       await login(values); // Chama a função de login do AuthContext
-      toast.success("Login realizado com sucesso!");
+      toast.success("Signed in successfully!");
       router.push("/"); // Redireciona para a página inicial
     } catch (error) {
       // O erro vem do nosso api.service, que já formata a mensagem
-      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
-      toast.error("Falha na autenticação", {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      toast.error("Authentication failed", {
         description: errorMessage,
       });
     }
@@ -60,9 +60,9 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
         <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight">Acessar Plataforma</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Sign In</h1>
           <p className="text-sm text-muted-foreground">
-            Use suas credenciais para entrar no sistema
+            Use your credentials to access the platform
           </p>
         </div>
         <Form {...form}>
@@ -72,9 +72,9 @@ export default function LoginPage() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>E-mail</FormLabel>
+                  <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="seu@email.com" {...field} />
+                    <Input placeholder="your@email.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -85,7 +85,7 @@ export default function LoginPage() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Senha</FormLabel>
+                  <FormLabel>Password</FormLabel>
                   <FormControl>
                     <Input type="password" placeholder="******" {...field} />
                   </FormControl>
@@ -98,7 +98,7 @@ export default function LoginPage() {
               className="w-full"
               disabled={form.formState.isSubmitting} // Desabilita o botão durante o envio
             >
-              {form.formState.isSubmitting ? "Entrando..." : "Entrar"}
+              {form.formState.isSubmitting ? "Signing in..." : "Sign In"}
             </Button>
           </form>
         </Form>

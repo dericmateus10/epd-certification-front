@@ -13,7 +13,7 @@ import { ProductResponse, UpdateProductDto } from '@/types/product.types';
 
 // MUDANÇA AQUI: Schema atualizado para os novos nomes de campo
 const formSchema = z.object({
-  productCode: z.string().min(1, { message: 'O código é obrigatório.' }),
+  productCode: z.string().min(1, { message: 'The code is required.' }),
   productDescription: z.string().optional(),
 });
 
@@ -38,7 +38,7 @@ export function ProductForm({ productToEdit, onSuccess, onImport, onUpdate }: Pr
 
   useEffect(() => {
     if (isEditMode && productToEdit) {
-      // MUDANÇA AQUI: Populando o form com os novos nomes de propriedade
+      
       form.reset({
         productCode: productToEdit.productCode,
         productDescription: productToEdit.productDescription || '',
@@ -61,7 +61,7 @@ export function ProductForm({ productToEdit, onSuccess, onImport, onUpdate }: Pr
       }
       onSuccess();
     } catch (error) {
-      console.error('Falha ao salvar o produto:', error);
+      console.error('Failed to save material:', error);
     }
   }
 
@@ -74,10 +74,10 @@ export function ProductForm({ productToEdit, onSuccess, onImport, onUpdate }: Pr
           name="productCode"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Código do Produto</FormLabel>
+              <FormLabel>Material Code</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Insira o código para importar"
+                  placeholder="Enter code to import"
                   {...field}
                   disabled={isEditMode}
                 />
@@ -94,9 +94,9 @@ export function ProductForm({ productToEdit, onSuccess, onImport, onUpdate }: Pr
             name="productDescription"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nome / Descrição</FormLabel>
+                <FormLabel>Name / Description</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nome e descrição do produto" {...field} />
+                  <Input placeholder="Material name and description" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -107,8 +107,8 @@ export function ProductForm({ productToEdit, onSuccess, onImport, onUpdate }: Pr
         <div className="flex justify-end">
           <Button type="submit" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting 
-              ? (isEditMode ? 'Salvando...' : 'Importando...') 
-              : (isEditMode ? 'Salvar Alterações' : 'Importar Produto')}
+              ? (isEditMode ? 'Saving...' : 'Importing...') 
+              : (isEditMode ? 'Save Changes' : 'Import Material')}
           </Button>
         </div>
       </form>

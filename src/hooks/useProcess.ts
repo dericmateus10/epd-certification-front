@@ -21,10 +21,11 @@ export function useProcess(processId: string) {
       const data = await processService.getById(processId);
       setProcess(data);
     } catch (error) {
-      toast.error('Erro ao buscar os detalhes do processo', {
+      console.error('Error fetching process', error);
+      toast.error('Error fetching process', {
         description: error instanceof Error ? error.message : String(error),
       });
-      setProcess(null); // Limpa o estado em caso de erro
+      setProcess(null);
     } finally {
       setLoading(false);
     }
