@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import Link from 'next/link';
 
 
 export default function ProductsPage() {
@@ -128,6 +129,14 @@ export default function ProductsPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                       <DropdownMenuItem asChild>
+                        {/* Link para Componentes - USA O ID DO PRODUTO */}
+                        <Link href={`/products/${product.id}/components`}>View Components</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        {/* Link para Roteiros - USA O ID DO PRODUTO */}
+                        <Link href={`/products/${product.id}/routings`}>View Routings</Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleOpenEditModal(product)}>
                         Edit
                       </DropdownMenuItem>

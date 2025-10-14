@@ -2,6 +2,8 @@ import { AuthResponseDto, LoginDto, UserResponseDto } from "@/types/auth.types";
 import { ProductResponse, UpdateProductDto } from "@/types/product.types";
 import { PaginatedResponse } from "@/types/api.types"; 
 import { ProcessResponse } from "@/types/process.types";
+import { ComponentResponse } from "@/types/component.types";
+import { RoutingResponse } from "@/types/routing.types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
@@ -129,6 +131,10 @@ export const productService = {
     });
   },
 
+  findRoutingsByProductId: (productId: string): Promise<RoutingResponse[]> => {
+    return apiRequest(`/products/${productId}/routings`);
+  },
+
   // NOVA FUNÇÃO: Obter códigos dos componentes
   getDistinctComponentCodes: (productCode: string): Promise<string[]> => {
     return apiRequest(`/products/${productCode}/distinct-component-codes`, {
@@ -148,4 +154,11 @@ export const productService = {
   },
 
 
+};
+
+// --- Serviço de Componentes ---
+export const componentService = {
+  findAllByProduct: (productId: string): Promise<ComponentResponse[]> => {
+    return apiRequest(`/components/product/${productId}`);
+  },
 };
