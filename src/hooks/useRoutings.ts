@@ -5,7 +5,6 @@ import { productService } from '@/services/api.service';
 import { RoutingResponse } from '@/types/routing.types';
 import { toast } from 'sonner';
 
-// MUDANÇA AQUI: O hook agora aceita productId
 export function useRoutings(productId: string) {
   const [routings, setRoutings] = useState<RoutingResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,9 +17,11 @@ export function useRoutings(productId: string) {
 
     try {
       setLoading(true);
-      // MUDANÇA AQUI: Chama a nova função do serviço
-      const data = await productService.findRoutingsByProductId(productId);
-      setRoutings(data);
+      const allRoutings = await productService.findRoutingsByProductId(productId);
+      
+      const filteredData = allRoutings.filter(routing => !!routing.workCenterCode);
+     
+      setRoutings(filteredData);
     } catch (error) {
       toast.error('Error fetching routings', {
         description: error instanceof Error ? error.message : String(error),
@@ -28,7 +29,6 @@ export function useRoutings(productId: string) {
     } finally {
       setLoading(false);
     }
-    // MUDANÇA AQUI: A dependência agora é o productId
   }, [productId]);
 
   useEffect(() => {

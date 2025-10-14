@@ -1,22 +1,25 @@
 'use client';
 
-import { useState, useRef } from 'react'; // CORREÇÃO 1
+import { useState, useRef } from 'react'; ''
 import { useProducts } from '@/hooks/useProducts';
 import { MoreHorizontal } from 'lucide-react';
 import { ProductResponse } from '@/types/product.types';
 import { ProductForm } from './ProductForm';
 import { toast } from 'sonner';
-import { productService } from '@/services/api.service'; // CORREÇÃO 2
+import { productService } from '@/services/api.service'; 
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 
 
 export default function ProductsPage() {
   const { products, loading, deleteProduct, importProduct, updateProduct } = useProducts();
+
+  const [searchTerm, setSearchTerm] = useState('');
   
   const [productToDelete, setProductToDelete] = useState<ProductResponse | null>(null);
   const [productToEdit, setProductToEdit] = useState<ProductResponse | null>(null);
@@ -86,9 +89,19 @@ export default function ProductsPage() {
     }
   };
 
+  const filteredProducts = products.filter((product) => {
+    const term = searchTerm.toLowerCase();
+    const productCode = product.productCode.toLowerCase();
+    const productDescription = (product.productDescription || '').toLowerCase();
+
+    return productCode.includes(term) || productDescription.includes(term);
+  });
+
+
   if (loading) {
     return <div>Loading materials...</div>;
   }
+
 
   return (
     <div className="container mx-auto py-10">
@@ -105,6 +118,15 @@ export default function ProductsPage() {
         <Button onClick={handleOpenCreateModal}>Add Material</Button>
       </div>
 
+      <div className="mb-4">
+        <Input
+          placeholder="Filter materials by code or description..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-sm"
+        />
+      </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -115,7 +137,8 @@ export default function ProductsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => (
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => (
               <TableRow key={product.id}>
                 <TableCell className="font-medium">{product.productCode}</TableCell>
                 <TableCell>{product.productDescription || '-'}</TableCell>
@@ -153,7 +176,14 @@ export default function ProductsPage() {
                   </DropdownMenu>
                 </TableCell>
               </TableRow>
-            ))}
+            ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center text-muted-foreground">
+                  No materials found.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>

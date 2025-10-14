@@ -1,3 +1,4 @@
+// src/app/(main)/products/[productId]/routings/page.tsx
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -39,11 +40,13 @@ export default function RoutingsListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              {/* MUDANÇA AQUI: Adicionamos novas colunas */}
+              {/* MUDANÇA AQUI: Adicionando novos cabeçalhos */}
               <TableHead>Operation No.</TableHead>
+              <TableHead>Material Code</TableHead>
+              <TableHead>Material Description</TableHead>
               <TableHead>Work Center</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="text-right">Base Qty</TableHead>
+              <TableHead className="text-right">Setup Machine</TableHead>
+              <TableHead className="text-right">Setup Operator</TableHead>
               <TableHead className="text-right">Machine Hours</TableHead>
               <TableHead className="text-right">Operator Hours</TableHead>
               <TableHead className="text-center">Primary</TableHead>
@@ -53,13 +56,15 @@ export default function RoutingsListPage() {
             {routings.length > 0 ? (
               routings.map((routing) => (
                 <TableRow key={routing.id}>
-                  {/* MUDANÇA AQUI: Adicionamos as novas células */}
+                  {/* MUDANÇA AQUI: Adicionando as novas células de dados */}
                   <TableCell className="font-medium">
                     {routing.operationNumber || '-'}
                   </TableCell>
+                  <TableCell>{routing.materialCode || '-'}</TableCell>
+                  <TableCell>{routing.materialDescription || '-'}</TableCell>
                   <TableCell>{routing.workCenterCode || '-'}</TableCell>
-                  <TableCell>{routing.description || '-'}</TableCell>
-                  <TableCell className="text-right">{routing.baseQuantity}</TableCell>
+                  <TableCell className="text-right">{routing.setupMachine}</TableCell>
+                  <TableCell className="text-right">{routing.setupOperator}</TableCell>
                   <TableCell className="text-right">
                     {routing.machineHours}
                   </TableCell>
@@ -73,8 +78,8 @@ export default function RoutingsListPage() {
               ))
             ) : (
               <TableRow>
-                {/* MUDANÇA AQUI: colSpan atualizado para 7 colunas */}
-                <TableCell colSpan={7} className="h-24 text-center">
+                {/* MUDANÇA AQUI: colSpan atualizado para 9 colunas */}
+                <TableCell colSpan={9} className="h-24 text-center">
                   No routings found for this material.
                 </TableCell>
               </TableRow>
