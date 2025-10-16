@@ -11,16 +11,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useProduct } from '@/hooks/useProduct';
 
 export default function ComponentsListPage() {
   const params = useParams();
   const { productId } = params;
 
-  // 1. Usamos nosso novo hook para buscar os dados
-  const { components, loading } = useComponents(productId as string);
+  const { product, loading: productLoading } = useProduct(productId as string);
+  const { components, loading: componentsLoading } = useComponents(productId as string);
 
-  // 2. Exibimos um estado de carregamento
-  if (loading) {
+  const isLoading = productLoading || componentsLoading;
+
+  if (isLoading) {
     return (
       <div>
         <PageHeader title="Components" subtitle="Loading component list..."/>
@@ -32,8 +34,9 @@ export default function ComponentsListPage() {
   return (
     <div>
       <PageHeader
+        // 3. Popule o cabeçalho com os dados do produto
         title="Material Components"
-        subtitle={`List of all components for the material with ID: ${productId}`}
+        subtitle={product ? `${product.productCode} - ${product.productDescription}` : `Loading details for ID: ${productId}`}
       />
       
       {/* 3. Renderizamos a tabela com os dados */}

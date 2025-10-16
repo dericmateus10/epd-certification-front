@@ -1,4 +1,3 @@
-// src/app/(main)/products/[productId]/routings/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -24,8 +23,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { SlidersHorizontal } from 'lucide-react';
+import { useProduct } from '@/hooks/useProduct';
 
-// Definindo a interface para o estado de visibilidade das colunas
 type ColumnVisibility = {
   [key: string]: boolean;
 };
@@ -34,9 +33,11 @@ export default function RoutingsListPage() {
   const params = useParams();
   const { productId } = params;
 
-  const { routings, loading } = useRoutings(productId as string);
+  const { product, loading: productLoading } = useProduct(productId as string);
+  const { routings, loading: routingsLoading } = useRoutings(productId as string);
 
-  // 1. STATE: Estado para controlar a visibilidade de cada coluna. Todas começam visíveis.
+  const isLoading = productLoading || routingsLoading;
+
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
     operationNumber: true,
     materialCode: true,
@@ -49,10 +50,9 @@ export default function RoutingsListPage() {
     isPrimary: true,
   });
 
-  // 2. CALCULATION: Calcula o número de colunas visíveis para o colSpan dinâmico.
   const visibleColumnsCount = Object.values(columnVisibility).filter(Boolean).length;
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div>
         <PageHeader title="Routings" subtitle="Loading routing list..." />
@@ -65,7 +65,7 @@ export default function RoutingsListPage() {
     <div>
       <PageHeader
         title="Material Routings"
-        subtitle={`List of all routing steps for the material with ID: ${productId}`}
+        subtitle={product ? `${product.productCode} - ${product.productDescription}` : `Loading details for ID: ${productId}`}
       />
 
       {/* 3. UI: Adicionamos o botão de Dropdown para controlar as colunas */}

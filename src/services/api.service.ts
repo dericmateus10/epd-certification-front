@@ -123,6 +123,11 @@ export const productService = {
     return apiRequest('/products');
   },
 
+  // --- Buscar um único material pelo seu ID --
+  getById: (productId: string): Promise<ProductResponse> => {
+    return apiRequest(`/products/${productId}`);
+  },
+
   // --- Buscar o relatório de horas de qualidade ---
   getQualityHoursReport: (productId: string): Promise<QualityHoursResponse[]> => {
     return apiRequest(`/products/${productId}/quality-hours-report`);

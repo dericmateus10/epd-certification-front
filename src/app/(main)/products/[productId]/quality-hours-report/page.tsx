@@ -10,15 +10,20 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter,
 } from '@/components/ui/table';
-import { StatCard } from '@/components/common/StatCard'; // 1. Importe o novo StatCard
-import { useMemo } from 'react'; // 2. Importe o useMemo
+import { StatCard } from '@/components/common/StatCard';
+import { useMemo } from 'react';
+import { useProduct } from '@/hooks/useProduct';
 
 export default function QualityHoursReportPage() {
   const params = useParams();
   const { productId } = params;
 
-  const { reportData, loading } = useQualityHoursReport(productId as string);
+  const { product, loading: productLoading } = useProduct(productId as string);
+  const { reportData, loading: reportLoading } = useQualityHoursReport(productId as string);
+
+  const isLoading = productLoading || reportLoading;
 
   const totals = useMemo(() => {
     const individualTotals = reportData.reduce(
@@ -44,7 +49,7 @@ export default function QualityHoursReportPage() {
     };
   }, [reportData]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div>
         <PageHeader title="Quality Hours Report" subtitle="Loading report data..." />
@@ -59,7 +64,7 @@ export default function QualityHoursReportPage() {
     <div>
       <PageHeader
         title="Quality Hours Report"
-        subtitle={productDescription || `Analysis for material ID: ${productId}`}
+        subtitle={product ? `${product.productCode} - ${product.productDescription}` : `Loading details for ID: ${productId}`}
       />
 
       <div className="grid gap-4 md:grid-cols-3 mb-8">
@@ -80,29 +85,6 @@ export default function QualityHoursReportPage() {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-        <StatCard
-          title="Setup Operator (h)"
-          value={totals.setupOperator.toFixed(2)}
-          description="Total time for operator setup"
-        />
-        <StatCard
-          title="Setup Machine (h)"
-          value={totals.setupMachine.toFixed(2)}
-          description="Total time for machine setup"
-        />
-        <StatCard
-          title="Operator (h)"
-          value={totals.operator.toFixed(2)}
-          description="Total execution time by operators"
-        />
-        <StatCard
-          title="Machine (h)"
-          value={totals.machine.toFixed(2)}
-          description="Total execution time by machines"
-        />
-      </div>
-
       {/* 5. TABELA DE DADOS DETALHADOS */}
       <div className="rounded-md border bg-white">
         <Table>
@@ -110,10 +92,39 @@ export default function QualityHoursReportPage() {
             <TableRow>
               <TableHead>Work Center</TableHead>
               <TableHead>Operation</TableHead>
-              <TableHead className="text-right">Setup Operator (h)</TableHead>
-              <TableHead className="text-right">Setup Machine (h)</TableHead>
-              <TableHead className="text-right">Operator (h)</TableHead>
-              <TableHead className="text-right">Machine (h)</TableHead>
+              {/* MUDANÇA PRINCIPAL AQUI: Cabeçalhos com totais integrados */}
+              <TableHead className="text-right">
+                <div>
+                  <span>Setup Operator (h)</span>
+                  <span className="block text-xs font-normal text-muted-foreground">
+                    {totals.setupOperator.toFixed(2)}
+                  </span>
+                </div>
+              </TableHead>
+              <TableHead className="text-right">
+                <div>
+                  <span>Setup Machine (h)</span>
+                  <span className="block text-xs font-normal text-muted-foreground">
+                    {totals.setupMachine.toFixed(2)}
+                  </span>
+                </div>
+              </TableHead>
+              <TableHead className="text-right">
+                <div>
+                  <span>Operator (h)</span>
+                  <span className="block text-xs font-normal text-muted-foreground">
+                    {totals.operator.toFixed(2)}
+                  </span>
+                </div>
+              </TableHead>
+              <TableHead className="text-right">
+                <div>
+                  <span>Machine (h)</span>
+                  <span className="block text-xs font-normal text-muted-foreground">
+                    {totals.machine.toFixed(2)}
+                  </span>
+                </div>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -136,6 +147,18 @@ export default function QualityHoursReportPage() {
               </TableRow>
             )}
           </TableBody>
+          {/* MUDANÇA AQUI: Adicionamos o TableFooter para os totais */}
+          {reportData.length > 0 && (
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={2} className="font-bold">Total</TableCell>
+                <TableCell className="text-right font-bold">{totals.setupOperator.toFixed(2)}</TableCell>
+                <TableCell className="text-right font-bold">{totals.setupMachine.toFixed(2)}</TableCell>
+                <TableCell className="text-right font-bold">{totals.operator.toFixed(2)}</TableCell>
+                <TableCell className="text-right font-bold">{totals.machine.toFixed(2)}</TableCell>
+              </TableRow>
+            </TableFooter>
+          )}
         </Table>
       </div>
     </div>
