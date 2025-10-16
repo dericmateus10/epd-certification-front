@@ -4,6 +4,8 @@ import { PaginatedResponse } from "@/types/api.types";
 import { ProcessResponse } from "@/types/process.types";
 import { ComponentResponse } from "@/types/component.types";
 import { RoutingResponse } from "@/types/routing.types";
+import { MetersOnProcessesResponse } from "@/types/relationship.types";
+import { QualityHoursResponse } from "@/types/quality-hours.types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
@@ -82,9 +84,17 @@ async function apiRequest<T>(endpoint: string, options: ApiRequestOptions = {}):
   return response.json() as Promise<T>;
 }
 
+// --- Serviço de Relacionamentos ---
+export const relationshipService = {
+  // MUDANÇA AQUI: Renomeie a função e remova o parâmetro da URL
+  getAllMetersOnProcesses: (): Promise<MetersOnProcessesResponse[]> => {
+    return apiRequest(`/relationships/meters-processes`);
+  },
+};
+
+
 // --- Serviço de Processos ---
 export const processService = {
-  // MUDANÇA AQUI: Atualize o tipo de retorno
   getAll: (): Promise<PaginatedResponse<ProcessResponse>> => {
     return apiRequest('/processes?limit=100');
   },
@@ -112,7 +122,12 @@ export const productService = {
   getAll: (): Promise<PaginatedResponse<ProductResponse>> => {
     return apiRequest('/products');
   },
-  // MUDANÇA AQUI: Substituímos a função 'create'
+
+  // --- Buscar o relatório de horas de qualidade ---
+  getQualityHoursReport: (productId: string): Promise<QualityHoursResponse[]> => {
+    return apiRequest(`/products/${productId}/quality-hours-report`);
+  },
+
   importByCode: (productCode: string): Promise<ProductResponse> => {
     // Faz um POST para a nova rota, sem corpo (body)
     return apiRequest(`/import/product/${productCode}`, {

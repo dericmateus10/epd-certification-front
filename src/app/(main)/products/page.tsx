@@ -152,6 +152,9 @@ export default function ProductsPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/products/${product.id}/quality-hours-report`}>Quality Hours Report</Link>
+                      </DropdownMenuItem>
                        <DropdownMenuItem asChild>
                         {/* Link para Componentes - USA O ID DO PRODUTO */}
                         <Link href={`/products/${product.id}/components`}>View Components</Link>

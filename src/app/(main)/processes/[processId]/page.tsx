@@ -1,19 +1,22 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-// 1. Importe o hook correto (singular) do arquivo correto
 import { useProcess } from '@/hooks/useProcess';
 import { PageHeader } from '@/components/common/PageHeader';
+import { useProcessInputs } from '@/hooks/useProcessInputs';
+import { ProcessInputs } from './ProcessInputs';
 
 export default function ProcessDetailPage() {
   const params = useParams();
   const { processId } = params;
   
-  // 2. Chame o hook correto (singular) e desestruture a variável 'process' (singular)
-  const { process, loading } = useProcess(processId as string);
 
-  // O estado de carregamento é exibido enquanto os dados são buscados
-  if (loading) {
+  const { process, loading: isProcessLoading } = useProcess(processId as string);
+
+  const { inputs, loading: areInputsLoading } = useProcessInputs(processId as string)
+
+  
+  if (isProcessLoading) {
     return <div>Loading process details...</div>;
   }
 
@@ -25,7 +28,6 @@ export default function ProcessDetailPage() {
     );
   }
 
-  // Se tudo deu certo, exibe a página com os dados do processo
   return (
     <div>
       {/* 3. Use a variável 'process' para exibir os dados dinâmicos */}
@@ -33,7 +35,17 @@ export default function ProcessDetailPage() {
         title={`${process.stepNumber}. ${process.name}`}
         subtitle="Environmental Product Declaration - Manufacturing Process"
       />
-
+       {/* 4. Renderize o novo componente de Inputs */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <ProcessInputs inputs={inputs} isLoading={areInputsLoading} />
+        
+        {/* Espaço reservado para o futuro componente de "Outputs" */}
+        <div className="rounded-lg border bg-white shadow-sm p-4">
+          <h3 className="text-lg font-semibold">Outputs</h3>
+          <p className="text-sm text-gray-500 mt-4">This section will be built next.</p>
+        </div>
+      </div>
+        
       <div className="p-6 border rounded-lg bg-white shadow-sm">
         <p>The complete process dashboard will be added here...</p>
         <p className="font-mono mt-4 text-xs bg-gray-100 p-2 rounded">ID: {process.id}</p>
