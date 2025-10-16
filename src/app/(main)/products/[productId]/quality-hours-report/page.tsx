@@ -20,9 +20,8 @@ export default function QualityHoursReportPage() {
 
   const { reportData, loading } = useQualityHoursReport(productId as string);
 
-  // 3. CÁLCULO DOS TOTAIS: Usamos useMemo para otimização
   const totals = useMemo(() => {
-    return reportData.reduce(
+    const individualTotals = reportData.reduce(
       (acc, current) => {
         acc.setupOperator += current.setupOperatorHoursApi;
         acc.setupMachine += current.setupMachineHoursApi;
@@ -32,6 +31,17 @@ export default function QualityHoursReportPage() {
       },
       { setupOperator: 0, setupMachine: 0, operator: 0, machine: 0 }
     );
+
+    const totalOperatorHours = individualTotals.setupOperator + individualTotals.operator;
+    const totalMachineHours = individualTotals.setupMachine + individualTotals.machine;
+    const grandTotalHours = totalOperatorHours + totalMachineHours;
+
+    return {
+      ...individualTotals,
+      totalOperator: totalOperatorHours,
+      totalMachine: totalMachineHours,
+      grandTotal: grandTotalHours,
+    };
   }, [reportData]);
 
   if (loading) {
@@ -51,8 +61,25 @@ export default function QualityHoursReportPage() {
         title="Quality Hours Report"
         subtitle={productDescription || `Analysis for material ID: ${productId}`}
       />
-      
-      {/* 4. SEÇÃO DE CARTÕES DE RESUMO */}
+
+      <div className="grid gap-4 md:grid-cols-3 mb-8">
+        <StatCard
+          title="Total Operator Hours"
+          value={totals.totalOperator.toFixed(2)}
+          description="Sum of Operator and Setup Operator hours"
+        />
+        <StatCard
+          title="Total Machine Hours"
+          value={totals.totalMachine.toFixed(2)}
+          description="Sum of Machine and Setup Machine hours"
+        />
+        <StatCard
+          title="Grand Total Hours"
+          value={totals.grandTotal.toFixed(2)}
+          description="Total time spent on this material"
+        />
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatCard
           title="Setup Operator (h)"
