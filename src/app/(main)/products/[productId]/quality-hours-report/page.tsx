@@ -11,12 +11,28 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { StatCard } from '@/components/common/StatCard'; // 1. Importe o novo StatCard
+import { useMemo } from 'react'; // 2. Importe o useMemo
 
 export default function QualityHoursReportPage() {
   const params = useParams();
   const { productId } = params;
 
   const { reportData, loading } = useQualityHoursReport(productId as string);
+
+  // 3. CÁLCULO DOS TOTAIS: Usamos useMemo para otimização
+  const totals = useMemo(() => {
+    return reportData.reduce(
+      (acc, current) => {
+        acc.setupOperator += current.setupOperatorHoursApi;
+        acc.setupMachine += current.setupMachineHoursApi;
+        acc.operator += current.operatorHoursApi;
+        acc.machine += current.machineHoursApi;
+        return acc;
+      },
+      { setupOperator: 0, setupMachine: 0, operator: 0, machine: 0 }
+    );
+  }, [reportData]);
 
   if (loading) {
     return (
@@ -27,7 +43,6 @@ export default function QualityHoursReportPage() {
     );
   }
 
-  // Pega a descrição do produto do primeiro item do relatório para o subtítulo
   const productDescription = reportData.length > 0 ? reportData[0].productDescription : '';
 
   return (
@@ -37,6 +52,31 @@ export default function QualityHoursReportPage() {
         subtitle={productDescription || `Analysis for material ID: ${productId}`}
       />
       
+      {/* 4. SEÇÃO DE CARTÕES DE RESUMO */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <StatCard
+          title="Setup Operator (h)"
+          value={totals.setupOperator.toFixed(2)}
+          description="Total time for operator setup"
+        />
+        <StatCard
+          title="Setup Machine (h)"
+          value={totals.setupMachine.toFixed(2)}
+          description="Total time for machine setup"
+        />
+        <StatCard
+          title="Operator (h)"
+          value={totals.operator.toFixed(2)}
+          description="Total execution time by operators"
+        />
+        <StatCard
+          title="Machine (h)"
+          value={totals.machine.toFixed(2)}
+          description="Total execution time by machines"
+        />
+      </div>
+
+      {/* 5. TABELA DE DADOS DETALHADOS */}
       <div className="rounded-md border bg-white">
         <Table>
           <TableHeader>
@@ -52,7 +92,6 @@ export default function QualityHoursReportPage() {
           <TableBody>
             {reportData.length > 0 ? (
               reportData.map((row, index) => (
-                // Usamos o index como key se não houver um ID único por linha de relatório
                 <TableRow key={`${row.productId}-${index}`}>
                   <TableCell className="font-medium">{row.workCenterDescription || row.workCenterCode || '-'}</TableCell>
                   <TableCell>{row.operationDescription || '-'}</TableCell>
