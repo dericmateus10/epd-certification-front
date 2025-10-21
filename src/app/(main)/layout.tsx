@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ProcessResponse } from '@/types/process.types';
 import { useProcesses } from '@/hooks/useProcesses';
@@ -70,16 +70,20 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   
   // 2. Use o hook para buscar os processos e seu estado de carregamento
   const { processes, loading: areProcessesLoading } = useProcesses();
 
   useEffect(() => {
+    // Evita empurrar para /login se já estamos na própria rota de login
     if (!isAuthLoading && !isAuthenticated) {
-      router.push('/login');
+      if (pathname !== '/login') {
+        router.replace('/login');
+      }
     }
     // A lógica de fetchProcesses foi movida para dentro do hook, então não é mais necessária aqui.
-  }, [isAuthLoading, isAuthenticated, router]);
+  }, [isAuthLoading, isAuthenticated, router, pathname]);
 
   if (isAuthLoading) {
     return <LoadingSpinner />;

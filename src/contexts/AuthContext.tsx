@@ -1,83 +1,82 @@
-'use client'; // Essencial para indicar que este é um Client Component
+// src/contexts/AuthContext.tsx
+'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService } from '@/services/api.service';
-import { UserResponseDto, LoginDto, AuthResponseDto } from '@/types/auth.types';
+import { UserResponseDto } from '@/types/auth.types';
 
-// 1. Define a "forma" do nosso contexto
+// 1. A "forma" do contexto mudou (sem login/logout explícitos aqui)
 interface AuthContextType {
   user: UserResponseDto | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (credentials: LoginDto) => Promise<void>;
-  logout: () => void;
+  checkAuthStatus: () => Promise<void>; // Função para revalidar
 }
 
-// 2. Cria o Contexto com um valor inicial indefinido
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// 3. Cria o Provedor (o componente que vai gerenciar o estado)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserResponseDto | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // Começa como true para verificar o token
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Este useEffect roda uma vez quando o app carrega
-  useEffect(() => {
-    const validateToken = async () => {
-      const token = localStorage.getItem('epd_auth_token');
-      if (token) {
-        try {
-          // Se temos um token, tentamos buscar os dados do usuário
-          const userData = await authService.getMe();
-          setUser(userData);
-        } catch (error) {
-          // Se o token for inválido, o getMe() falha. Limpamos o token.
-          console.error("Invalid session:", error);
-          localStorage.removeItem('epd_auth_token');
-          setUser(null);
-        }
-      }
-      setIsLoading(false); // Finaliza o carregamento inicial
-    };
-
-    validateToken();
-  }, []);
-
-  const login = async (credentials: LoginDto) => {
+  // Função para verificar se o cookie de sessão é válido
+  const checkAuthStatus = async () => {
+    setIsLoading(true);
     try {
-      const response = await authService.login(credentials);
-      localStorage.setItem('epd_auth_token', response.access_token);
-      // Após o login, buscamos os dados completos do usuário
+      // A chamada ao /auth/me SÓ funcionará se o cookie httpOnly for válido.
+      // A opção 'credentials: include' no apiRequest garante que o cookie seja enviado.
       const userData = await authService.getMe();
       setUser(userData);
     } catch (error) {
-      console.error("Login failed:", error);
-      // Re-lança o erro para que o formulário de login possa tratá-lo (ex: mostrar um toast)
-      throw error;
+      // Se a chamada falhar (ex: 401 Unauthorized), significa que não há sessão válida.
+      console.warn("Verificação de sessão falhou:", error);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // Roda uma vez quando o provider é montado
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  // O logout agora é responsabilidade do backend invalidar o cookie.
+  // Poderíamos adicionar uma chamada a um endpoint /auth/logout se ele existir.
+  // Por enquanto, apenas limpamos o estado local.
   const logout = () => {
-    localStorage.removeItem('epd_auth_token');
+    // Idealmente, chamar um endpoint do backend aqui: POST /auth/logout
     setUser(null);
+    // Redirecionar para a página pública ou de login, se necessário
+    window.location.href = '/login'; // Ou use o useRouter se preferir
   };
+
 
   const value: AuthContextType = {
     user,
-    isAuthenticated: !!user, // Converte o objeto user em um booleano
+    isAuthenticated: !!user,
     isLoading,
-    login,
-    logout,
+    checkAuthStatus,
+    // Poderíamos expor a função logout se necessário em outros lugares
+    // logout, 
   };
+
+  // Removemos a necessidade de gerenciar o token no localStorage
+  // if (typeof window !== 'undefined') {
+  //   if (value.isAuthenticated) {
+  //     // Não precisamos mais salvar o token aqui
+  //   } else {
+  //     localStorage.removeItem('epd_auth_token'); // Limpa se houver token antigo
+  //   }
+  // }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// 4. Cria um Hook customizado para facilitar o uso do contexto
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
   }
   return context;
 }
