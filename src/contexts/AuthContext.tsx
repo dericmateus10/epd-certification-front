@@ -57,7 +57,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
   };
 
-  // NENHUMA interação com localStorage aqui!
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
