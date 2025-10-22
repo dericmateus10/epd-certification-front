@@ -1,16 +1,15 @@
-// src/contexts/AuthContext.tsx
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService } from '@/services/api.service';
 import { UserResponseDto } from '@/types/auth.types';
 
-// 1. A "forma" do contexto mudou (sem login/logout explícitos aqui)
 interface AuthContextType {
   user: UserResponseDto | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  checkAuthStatus: () => Promise<void>; // Função para revalidar
+  checkAuthStatus: () => Promise<void>;
+  logout: () => void; // Adicionando logout de volta para uso
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,36 +18,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserResponseDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Função para verificar se o cookie de sessão é válido
   const checkAuthStatus = async () => {
-    setIsLoading(true);
+    // Não precisa setar isLoading aqui, pois o estado inicial já é true
     try {
-      // A chamada ao /auth/me SÓ funcionará se o cookie httpOnly for válido.
-      // A opção 'credentials: include' no apiRequest garante que o cookie seja enviado.
       const userData = await authService.getMe();
       setUser(userData);
     } catch (error) {
-      // Se a chamada falhar (ex: 401 Unauthorized), significa que não há sessão válida.
-      console.warn("Verificação de sessão falhou:", error);
+      // Apenas loga o erro se falhar (ex: cookie inválido ou ausente)
+      console.warn("Auth status check failed (user likely not logged in):", error);
       setUser(null);
     } finally {
-      setIsLoading(false);
+       // Só finaliza o loading global uma vez, após a primeira tentativa
+       if (isLoading) setIsLoading(false);
     }
   };
 
-  // Roda uma vez quando o provider é montado
   useEffect(() => {
     checkAuthStatus();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Roda apenas uma vez na montagem inicial
 
-  // O logout agora é responsabilidade do backend invalidar o cookie.
-  // Poderíamos adicionar uma chamada a um endpoint /auth/logout se ele existir.
-  // Por enquanto, apenas limpamos o estado local.
-  const logout = () => {
-    // Idealmente, chamar um endpoint do backend aqui: POST /auth/logout
+  const logout = async () => {
     setUser(null);
-    // Redirecionar para a página pública ou de login, se necessário
-    window.location.href = '/login'; // Ou use o useRouter se preferir
+    // Idealmente, chamar um endpoint do backend que limpa o cookie httpOnly
+    // Exemplo: await apiRequest('/auth/logout', { method: 'POST' });
+    
+    // Redireciona para a página pública/login após limpar estado local
+    // (Pode ser melhor usar o useRouter para navegação no Next.js)
+    window.location.href = '/login'; 
   };
 
 
@@ -57,18 +54,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: !!user,
     isLoading,
     checkAuthStatus,
-    // Poderíamos expor a função logout se necessário em outros lugares
-    // logout, 
+    logout,
   };
 
-  // Removemos a necessidade de gerenciar o token no localStorage
-  // if (typeof window !== 'undefined') {
-  //   if (value.isAuthenticated) {
-  //     // Não precisamos mais salvar o token aqui
-  //   } else {
-  //     localStorage.removeItem('epd_auth_token'); // Limpa se houver token antigo
-  //   }
-  // }
+  // NENHUMA interação com localStorage aqui!
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
@@ -76,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }
