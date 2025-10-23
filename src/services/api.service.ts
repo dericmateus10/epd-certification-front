@@ -1,4 +1,4 @@
-import { AuthResponseDto, UserResponseDto } from "@/types/auth.types"; // LoginDto removido, não é mais usado
+import { AuthResponseDto, UserResponseDto } from "@/types/auth.types";
 import { ProductResponse, UpdateProductDto } from "@/types/product.types";
 import { PaginatedResponse } from "@/types/api.types";
 import { ProcessResponse } from "@/types/process.types";
@@ -7,7 +7,6 @@ import { RoutingResponse } from "@/types/routing.types";
 import { MetersOnProcessesResponse } from "@/types/relationship.types";
 import { QualityHoursResponse } from "@/types/quality-hours.types";
 
-// Garanta que esta variável esteja definida corretamente no seu .env.local
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 interface ErrorResponse {
@@ -16,20 +15,16 @@ interface ErrorResponse {
   error: string;
 }
 
-// Tipo customizado para as opções, permitindo 'any' no body para simplificar
 type ApiRequestOptions = Omit<RequestInit, 'body'> & {
   body?: any;
 };
 
 async function apiRequest<T>(endpoint: string, options: ApiRequestOptions = {}): Promise<T> {
-  // REMOVIDO: Lógica do token JWT do localStorage não é mais necessária com cookies httpOnly
-  // const token = typeof window !== 'undefined' ? localStorage.getItem('epd_auth_token') : null;
 
   console.log("API Request BASE_URL:", BASE_URL);
 
   const isFormData = options.body instanceof FormData;
 
-  // Normaliza headers para objeto simples
   let headersObj: Record<string, string> = {};
   if (options.headers) {
     if (options.headers instanceof Headers) {
@@ -41,12 +36,6 @@ async function apiRequest<T>(endpoint: string, options: ApiRequestOptions = {}):
     }
   }
 
-  // REMOVIDO: Header Authorization não é mais necessário
-  // if (token) {
-  //   headersObj['Authorization'] = `Bearer ${token}`;
-  // }
-
-  // Define o Content-Type apenas se não for FormData e se ainda não estiver definido
   if (!isFormData && !('Content-Type' in headersObj)) {
     headersObj['Content-Type'] = 'application/json';
   }
@@ -54,7 +43,6 @@ async function apiRequest<T>(endpoint: string, options: ApiRequestOptions = {}):
   const config: RequestInit = {
     ...options,
     headers: headersObj,
-    // Garante que o body seja stringified apenas quando necessário
     body: isFormData
       ? options.body
       : typeof options.body === 'string'
@@ -62,16 +50,13 @@ async function apiRequest<T>(endpoint: string, options: ApiRequestOptions = {}):
         : options.body != null
           ? JSON.stringify(options.body)
           : undefined,
-    // ESSENCIAL: Envia o cookie httpOnly cross-origin
     credentials: 'include',
   };
 
-  // GET e HEAD não podem ter body
   if (config.method === 'GET' || config.method === 'HEAD') {
     delete config.body;
   }
 
-  // Verifica se BASE_URL está definido para evitar erros
   if (!BASE_URL) {
     throw new Error("NEXT_PUBLIC_BACKEND_URL environment variable is not set.");
   }
@@ -83,7 +68,6 @@ async function apiRequest<T>(endpoint: string, options: ApiRequestOptions = {}):
     try {
       errorData = await response.json();
     } catch (jsonError) {
-      // Se a resposta de erro não for JSON, lança um erro genérico
       throw new Error(`Request failed with status ${response.status}: ${response.statusText}`);
     }
     const errorMessage = Array.isArray(errorData.message)
@@ -92,12 +76,10 @@ async function apiRequest<T>(endpoint: string, options: ApiRequestOptions = {}):
     throw new Error(errorMessage || 'An error occurred while making the request.');
   }
 
-  // Trata respostas sem conteúdo
   if (response.status === 204 || response.headers.get('content-length') === '0') {
     return null as T;
   }
 
-  // Tenta parsear JSON, mas trata caso não seja JSON
   try {
     return await response.json() as Promise<T>;
   } catch (jsonError) {
@@ -125,10 +107,6 @@ export const processService = {
 
 // --- Serviço de Autenticação ---
 export const authService = {
-  // REMOVIDO: Função login não é mais usada no fluxo SSO
-  // login: (data: LoginDto): Promise<AuthResponseDto> => { ... },
-
-  // ESSENCIAL: Verifica se o cookie de sessão é válido
   getMe: (): Promise<UserResponseDto> => {
     return apiRequest('/auth/me');
   },
@@ -137,7 +115,7 @@ export const authService = {
 // --- Serviço de Produtos ---
 export const productService = {
   getAll: (): Promise<PaginatedResponse<ProductResponse>> => {
-    return apiRequest('/products?limit=100'); // Adicionado limit=100 por padrão
+    return apiRequest('/products?limit=100');
   },
   getById: (productId: string): Promise<ProductResponse> => {
     return apiRequest(`/products/${productId}`);
@@ -158,12 +136,9 @@ export const productService = {
     return apiRequest(`/products/${productId}/routings`);
   },
   getDistinctComponentCodes: (productCode: string): Promise<string[]> => {
-    // Atenção: Esta rota ainda usa productCode conforme definido anteriormente.
-    // Se o backend padronizar para ID, precisará ser ajustada aqui.
     return apiRequest(`/products/${productCode}/distinct-component-codes`, { method: 'GET' });
   },
   importRouting: (productCode: string, file: File): Promise<any> => {
-    // Atenção: Esta rota ainda usa productCode. Se padronizar para ID, ajustar aqui.
     const formData = new FormData();
     formData.append('file', file);
     return apiRequest(`/routings/import/product/${productCode}`, { method: 'POST', body: formData });
@@ -172,7 +147,6 @@ export const productService = {
 
 // --- Serviço de Componentes ---
 export const componentService = {
-  // Atenção: Esta rota usa productId conforme definido anteriormente.
   findAllByProduct: (productId: string): Promise<ComponentResponse[]> => {
     return apiRequest(`/components/product/${productId}`);
   },
