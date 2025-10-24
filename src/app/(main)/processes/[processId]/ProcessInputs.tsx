@@ -17,38 +17,37 @@ interface ProcessInputsProps {
 
 export function ProcessInputs({ inputs, isLoading }: ProcessInputsProps) {
   if (isLoading) {
-    return <div className="p-4 text-center text-sm text-gray-500">Loading inputs...</div>;
+    return <div className="p-4 text-center text-sm text-muted-foreground">Loading inputs...</div>;
   }
 
   return (
-    <div className="rounded-lg border bg-white shadow-sm">
-      <div className="p-4 border-b">
-        <h3 className="text-lg font-semibold">Inputs</h3>
-        <p className="text-sm text-gray-500">Resources consumed in this process step.</p>
+    <div className="rounded-lg border border-border bg-card shadow-sm">
+      <div className="p-4 border-b border-border">
+        <h3 className="text-lg font-semibold text-foreground">Inputs</h3>
+        <p className="text-sm text-muted-foreground">Resources consumed in this process step.</p>
       </div>
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-muted">
           <TableRow>
-            <TableHead>Resource</TableHead>
-            <TableHead>Unit</TableHead>
-            <TableHead className="text-right">Allocation Factor</TableHead>
+            <TableHead className="text-muted-foreground">Resource</TableHead>
+            <TableHead className="text-muted-foreground">Unit</TableHead>
+            <TableHead className="text-right text-muted-foreground">Allocation Factor</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {inputs.length > 0 ? (
             inputs.map((input) => (
-              <TableRow key={input.id}>
-                <TableCell className="font-medium">{input.meter.code}</TableCell>
-                <TableCell>{input.meter.unit}</TableCell>
-                <TableCell className="text-right">
-                  {/* Formata o fator de alocação como uma porcentagem */}
+              <TableRow key={input.id} className="odd:bg-muted/40 hover:bg-muted/50 transition-colors">
+                <TableCell className="font-medium text-foreground">{input.meter.code}</TableCell>
+                <TableCell className="text-foreground">{input.meter.unit}</TableCell>
+                <TableCell className="text-right tabular-nums text-foreground">
                   {(input.allocationFactor * 100).toFixed(2)}%
                 </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={3} className="h-24 text-center">
+              <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">
                 No inputs found for this process.
               </TableCell>
             </TableRow>

@@ -9,15 +9,12 @@ import { ProcessInputs } from './ProcessInputs';
 export default function ProcessDetailPage() {
   const params = useParams();
   const { processId } = params;
-  
 
   const { process, loading: isProcessLoading } = useProcess(processId as string);
+  const { inputs, loading: areInputsLoading } = useProcessInputs(processId as string);
 
-  const { inputs, loading: areInputsLoading } = useProcessInputs(processId as string)
-
-  
   if (isProcessLoading) {
-    return <div>Loading process details...</div>;
+    return <div className="text-muted-foreground">Loading process details...</div>;
   }
 
   if (!process) {
@@ -30,25 +27,27 @@ export default function ProcessDetailPage() {
 
   return (
     <div>
-      {/* 3. Use a variável 'process' para exibir os dados dinâmicos */}
+      {/* Título e subtítulo do processo */}
       <PageHeader
         title={`${process.stepNumber}. ${process.name}`}
         subtitle="Environmental Product Declaration - Manufacturing Process"
       />
-       {/* 4. Renderize o novo componente de Inputs */}
+
+      {/* Conteúdo principal: Inputs e Outputs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <ProcessInputs inputs={inputs} isLoading={areInputsLoading} />
-        
-        {/* Espaço reservado para o futuro componente de "Outputs" */}
-        <div className="rounded-lg border bg-white shadow-sm p-4">
-          <h3 className="text-lg font-semibold">Outputs</h3>
-          <p className="text-sm text-gray-500 mt-4">This section will be built next.</p>
+
+        {/* Outputs (placeholder) */}
+        <div className="rounded-lg border border-border bg-card shadow-sm p-4">
+          <h3 className="text-lg font-semibold text-foreground">Outputs</h3>
+          <p className="text-sm text-muted-foreground mt-4">This section will be built next.</p>
         </div>
       </div>
-        
-      <div className="p-6 border rounded-lg bg-white shadow-sm">
-        <p>The complete process dashboard will be added here...</p>
-        <p className="font-mono mt-4 text-xs bg-gray-100 p-2 rounded">ID: {process.id}</p>
+
+      {/* Dashboard (placeholder) */}
+      <div className="p-6 border border-border rounded-lg bg-card shadow-sm mt-8">
+        <p className="text-foreground">The complete process dashboard will be added here...</p>
+        <p className="font-mono mt-4 text-xs bg-muted text-muted-foreground p-2 rounded">ID: {process.id}</p>
       </div>
     </div>
   );
