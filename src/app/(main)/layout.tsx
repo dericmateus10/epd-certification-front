@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { ProcessResponse } from '@/types/process.types';
 import { useProcesses } from '@/hooks/useProcesses';
 import Link from 'next/link'; // Importe o componente Link
+import { Button } from '@/components/ui/button';
+import { LogOut } from 'lucide-react';
 
 // Componente de Carregamento (Spinner)
 function LoadingSpinner() {
@@ -17,6 +19,7 @@ function LoadingSpinner() {
 }
 
 function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoading: boolean }) {
+  const { logout } = useAuth(); // 1. Pegue a função logout do contexto
   return (
     <aside className="w-72 bg-gray-900 text-white p-4 flex flex-col shadow-lg">
       {/* 1. Cabeçalho de Branding */}
@@ -62,6 +65,17 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
             </Link>
           </li>
         </ul>
+      </div>
+      {/* 2. BOTÃO DE LOGOUT: Adicione este bloco no final do sidebar */}
+      <div className="mt-auto pt-4 border-t border-border">
+        <Button
+          variant="ghost"
+          className="w-full justify-start"
+          onClick={logout} // 3. Chame a função logout ao clicar
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Logout</span>
+        </Button>
       </div>
     </aside>
   );
