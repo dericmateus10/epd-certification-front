@@ -110,6 +110,14 @@ export const authService = {
   getMe: (): Promise<UserResponseDto> => {
     return apiRequest('/auth/me');
   },
+
+  logout: (): Promise<{ message: string }> => { // O tipo de retorno é baseado no controller
+    return apiRequest('/auth/logout', {
+      method: 'POST',
+      // Não precisa enviar 'body' para esta rota
+    });
+  },
+
 };
 
 // --- Serviço de Produtos ---

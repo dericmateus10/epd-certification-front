@@ -36,10 +36,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []); 
 
   const logout = async () => {
-    setUser(null);
-    window.location.href = '/login'; 
-  };
+    setUser(null); // Limpa o estado local imediatamente para a UI responder
 
+    try {
+      // Chama o backend para limpar o cookie httpOnly
+      await authService.logout();
+      console.log("Backend logout successful");
+    } catch (error) {
+      // Loga o erro, mas continua o fluxo de redirecionamento
+      console.error("Backend logout failed:", error);
+    } finally {
+      // Redireciona para a página de login do frontend após a tentativa de logout no backend
+      window.location.href = '/login';
+    }
+  };
 
   const value: AuthContextType = {
     user,
