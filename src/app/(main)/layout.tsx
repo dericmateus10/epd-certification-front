@@ -7,7 +7,8 @@ import { ProcessResponse } from '@/types/process.types';
 import { useProcesses } from '@/hooks/useProcesses';
 import Link from 'next/link'; // Importe o componente Link
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
+import { LogOut, Sun, Moon } from 'lucide-react';
+import { useTheme } from 'next-themes'
 
 // Componente de Carregamento (Spinner)
 function LoadingSpinner() {
@@ -20,20 +21,34 @@ function LoadingSpinner() {
 
 function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoading: boolean }) {
   const { logout } = useAuth(); // 1. Pegue a função logout do contexto
-  return (
-    <aside className="w-72 bg-gray-900 text-white p-4 flex flex-col shadow-lg">
-      {/* 1. Cabeçalho de Branding */}
-      <div className="px-2 pb-4 mb-4 border-b border-gray-600">
-        <h1 className="text-xl font-bold">EPD Certification</h1>
-      </div>
+  const { theme, setTheme } = useTheme();
+  
+  const toggleTheme = () => {
+    if (theme === 'light') {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+  };
 
+  return (
+    <aside className="w-72 bg-sidebar text-sidebar-foreground p-4 flex flex-col shadow-lg border-r border-sidebar-border">
+      {/* 1. Cabeçalho de Branding */}
+      <div className="px-2 pb-4 mb-4 border-b border-sidebar-border flex items-center justify-between">
+        <h1 className="text-xl font-bold">EPD Certification</h1>
+        {/* Theme toggle */}
+        <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={toggleTheme}>
+          <Sun className="h-4 w-4 dark:hidden" />
+          <Moon className="h-4 w-4 hidden dark:block" />
+        </Button>
+      </div>
       {/* 2. Título da Seção de Navegação */}
       <h2 className="text-lg font-semibold mb-4 px-2">Manufacturing Steps</h2>
       
       {/* 3. Lista de Navegação Principal */}
       <nav className="flex-1 space-y-2">
         {isLoading ? (
-          <p className="text-sm text-gray-400 px-2">Loading steps...</p>
+          <p className="text-sm text-muted-foreground px-2">Loading steps...</p>
         ) : (
           <ul>
             {processes.map((process) => (
@@ -41,7 +56,7 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
                 <Link
                   // O href aponta para a rota dinâmica usando o ID do processo
                   href={`/processes/${process.id}`}
-                  className="w-full block p-2 rounded-md hover:bg-gray-700 transition-colors text-sm"
+                  className="w-full block p-2 rounded-md hover:bg-sidebar-accent transition-colors text-sm"
                 >
                   {/* O texto é formatado para remover underscores */}
                   {`${process.stepNumber}. ${process.name.replace(/_/g, ' ')}`}
@@ -54,12 +69,12 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
       
       {/* 4. Seção de Gerenciamento */}
       <div>
-        <h3 className="text-lg font-semibold mb-2 border-t border-gray-600 pt-4 px-2">Management</h3>
+        <h3 className="text-lg font-semibold mb-2 border-t border-sidebar-border pt-4 px-2">Management</h3>
         <ul>
           <li>
             <Link 
               href="/products" 
-              className="w-full block p-2 rounded-md hover:bg-gray-700 transition-colors text-sm"
+              className="w-full block p-2 rounded-md hover:bg-sidebar-accent transition-colors text-sm"
             >
               Materials
             </Link>
@@ -67,7 +82,7 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
         </ul>
       </div>
       {/* 2. BOTÃO DE LOGOUT: Adicione este bloco no final do sidebar */}
-      <div className="mt-auto pt-4 border-t border-border">
+      <div className="mt-auto pt-4 border-t border-sidebar-border">
         <Button
           variant="ghost"
           className="w-full justify-start"
@@ -108,7 +123,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <div className="flex h-screen">
         {/* 3. Passe os dados reais e o estado de carregamento para o Sidebar */}
         <Sidebar processes={processes} isLoading={areProcessesLoading} />
-        <main className="flex-1 p-8 bg-gray-100 overflow-y-auto">
+        <main className="flex-1 p-8 bg-background overflow-y-auto">
           {children}
         </main>
       </div>

@@ -86,7 +86,7 @@ export default function QualityHoursReportPage() {
       </div>
 
       {/* 5. TABELA DE DADOS DETALHADOS */}
-      <div className="rounded-md border bg-white">
+      <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -130,15 +130,15 @@ export default function QualityHoursReportPage() {
           <TableBody>
             {reportData.length > 0 ? (
               reportData.map((row, index) => (
-                <TableRow key={`${row.productId}-${index}`}>
-                  <TableCell className="font-medium">{row.workCenterDescription || row.workCenterCode || '-'}</TableCell>
-                  <TableCell>{row.operationDescription || '-'}</TableCell>
-                  <TableCell className="text-right">{row.setupOperatorHoursApi.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">{row.setupMachineHoursApi.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">{row.operatorHoursApi.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">{row.machineHoursApi.toFixed(2)}</TableCell>
-                </TableRow>
-              ))
+                <TableRow key={`${row.productId}-${index}`} className="odd:bg-muted/40 hover:bg-muted/50">
+                   <TableCell className="font-medium">{row.workCenterDescription || row.workCenterCode || '-'}</TableCell>
+                   <TableCell>{row.operationDescription || '-'}</TableCell>
+                   <TableCell className="text-right">{row.setupOperatorHoursApi.toFixed(2)}</TableCell>
+                   <TableCell className="text-right">{row.setupMachineHoursApi.toFixed(2)}</TableCell>
+                   <TableCell className="text-right">{row.operatorHoursApi.toFixed(2)}</TableCell>
+                   <TableCell className="text-right">{row.machineHoursApi.toFixed(2)}</TableCell>
+                 </TableRow>
+               ))
             ) : (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center">
@@ -149,16 +149,16 @@ export default function QualityHoursReportPage() {
           </TableBody>
           {/* MUDANÇA AQUI: Adicionamos o TableFooter para os totais */}
           {reportData.length > 0 && (
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={2} className="font-bold">Total</TableCell>
-                <TableCell className="text-right font-bold">{totals.setupOperator.toFixed(2)}</TableCell>
-                <TableCell className="text-right font-bold">{totals.setupMachine.toFixed(2)}</TableCell>
-                <TableCell className="text-right font-bold">{totals.operator.toFixed(2)}</TableCell>
-                <TableCell className="text-right font-bold">{totals.machine.toFixed(2)}</TableCell>
-              </TableRow>
-            </TableFooter>
-          )}
+            <TableFooter className="bg-muted">
+               <TableRow>
+                 <TableCell colSpan={2} className="font-bold">Total</TableCell>
+                 <TableCell className="text-right font-bold">{totals.setupOperator.toFixed(2)}</TableCell>
+                 <TableCell className="text-right font-bold">{totals.setupMachine.toFixed(2)}</TableCell>
+                 <TableCell className="text-right font-bold">{totals.operator.toFixed(2)}</TableCell>
+                 <TableCell className="text-right font-bold">{totals.machine.toFixed(2)}</TableCell>
+               </TableRow>
+             </TableFooter>
+           )}
         </Table>
       </div>
     </div>
