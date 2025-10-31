@@ -1,11 +1,14 @@
-import { AuthResponseDto, UserResponseDto } from "@/types/auth.types";
-import { ProductResponse, UpdateProductDto } from "@/types/product.types";
-import { PaginatedResponse } from "@/types/api.types";
-import { ProcessResponse } from "@/types/process.types";
+import type { PaginatedResponse } from "@/types/api.types";
+import { AuthResponseDto, type UserResponseDto } from "@/types/auth.types";
 import { ComponentResponse } from "@/types/component.types";
-import { RoutingResponse } from "@/types/routing.types";
-import { MetersOnProcessesResponse } from "@/types/relationship.types";
-import { QualityHoursResponse } from "@/types/quality-hours.types";
+import type { ProcessResponse } from "@/types/process.types";
+import type { ProductResponse, UpdateProductDto } from "@/types/product.types";
+import type { QualityHoursResponse } from "@/types/quality-hours.types";
+import type { MetersOnProcessesResponse } from "@/types/relationship.types";
+import {
+  type AnnualEfficiencyReportDto,
+} from "@/types/reports.types";
+import type { RoutingResponse } from "@/types/routing.types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -15,12 +18,14 @@ interface ErrorResponse {
   error: string;
 }
 
-type ApiRequestOptions = Omit<RequestInit, 'body'> & {
+type ApiRequestOptions = Omit<RequestInit, "body"> & {
   body?: any;
 };
 
-async function apiRequest<T>(endpoint: string, options: ApiRequestOptions = {}): Promise<T> {
-
+async function apiRequest<T>(
+  endpoint: string,
+  options: ApiRequestOptions = {},
+): Promise<T> {
   console.log("API Request BASE_URL:", BASE_URL);
 
   const isFormData = options.body instanceof FormData;
@@ -28,16 +33,20 @@ async function apiRequest<T>(endpoint: string, options: ApiRequestOptions = {}):
   let headersObj: Record<string, string> = {};
   if (options.headers) {
     if (options.headers instanceof Headers) {
-      options.headers.forEach((value, key) => { headersObj[key] = value; });
+      options.headers.forEach((value, key) => {
+        headersObj[key] = value;
+      });
     } else if (Array.isArray(options.headers)) {
-      for (const [key, value] of options.headers) { headersObj[key] = value; }
+      for (const [key, value] of options.headers) {
+        headersObj[key] = value;
+      }
     } else {
       headersObj = { ...(options.headers as Record<string, string>) };
     }
   }
 
-  if (!isFormData && !('Content-Type' in headersObj)) {
-    headersObj['Content-Type'] = 'application/json';
+  if (!isFormData && !("Content-Type" in headersObj)) {
+    headersObj["Content-Type"] = "application/json";
   }
 
   const config: RequestInit = {
@@ -45,15 +54,15 @@ async function apiRequest<T>(endpoint: string, options: ApiRequestOptions = {}):
     headers: headersObj,
     body: isFormData
       ? options.body
-      : typeof options.body === 'string'
+      : typeof options.body === "string"
         ? options.body
         : options.body != null
           ? JSON.stringify(options.body)
           : undefined,
-    credentials: 'include',
+    credentials: "include",
   };
 
-  if (config.method === 'GET' || config.method === 'HEAD') {
+  if (config.method === "GET" || config.method === "HEAD") {
     delete config.body;
   }
 
@@ -68,20 +77,27 @@ async function apiRequest<T>(endpoint: string, options: ApiRequestOptions = {}):
     try {
       errorData = await response.json();
     } catch (jsonError) {
-      throw new Error(`Request failed with status ${response.status}: ${response.statusText}`);
+      throw new Error(
+        `Request failed with status ${response.status}: ${response.statusText}`,
+      );
     }
     const errorMessage = Array.isArray(errorData.message)
-      ? errorData.message.join(', ')
+      ? errorData.message.join(", ")
       : errorData.message;
-    throw new Error(errorMessage || 'An error occurred while making the request.');
+    throw new Error(
+      errorMessage || "An error occurred while making the request.",
+    );
   }
 
-  if (response.status === 204 || response.headers.get('content-length') === '0') {
+  if (
+    response.status === 204 ||
+    response.headers.get("content-length") === "0"
+  ) {
     return null as T;
   }
 
   try {
-    return await response.json() as Promise<T>;
+    return (await response.json()) as Promise<T>;
   } catch (jsonError) {
     console.error("Failed to parse JSON response:", jsonError);
     throw new Error("Received non-JSON response from server.");
@@ -98,7 +114,7 @@ export const relationshipService = {
 // --- Serviço de Processos ---
 export const processService = {
   getAll: (): Promise<PaginatedResponse<ProcessResponse>> => {
-    return apiRequest('/processes?limit=100');
+    return apiRequest("/processes?limit=100");
   },
   getById: (id: string): Promise<ProcessResponse> => {
     return apiRequest(`/processes/${id}`);
@@ -108,54 +124,76 @@ export const processService = {
 // --- Serviço de Autenticação ---
 export const authService = {
   getMe: (): Promise<UserResponseDto> => {
-    return apiRequest('/auth/me');
+    return apiRequest("/auth/me");
   },
 
-  logout: (): Promise<{ message: string }> => { // O tipo de retorno é baseado no controller
-    return apiRequest('/auth/logout', {
-      method: 'POST',
+  logout: (): Promise<{ message: string }> => {
+    // O tipo de retorno é baseado no controller
+    return apiRequest("/auth/logout", {
+      method: "POST",
       // Não precisa enviar 'body' para esta rota
     });
   },
-
 };
 
 // --- Serviço de Produtos ---
 export const productService = {
   getAll: (): Promise<PaginatedResponse<ProductResponse>> => {
-    return apiRequest('/products?limit=100');
+    return apiRequest("/products?limit=100");
   },
   getById: (productId: string): Promise<ProductResponse> => {
     return apiRequest(`/products/${productId}`);
   },
-  getQualityHoursReport: (productId: string): Promise<QualityHoursResponse[]> => {
+  getQualityHoursReport: (
+    productId: string,
+  ): Promise<QualityHoursResponse[]> => {
     return apiRequest(`/products/${productId}/quality-hours-report`);
   },
   importByCode: (productCode: string): Promise<ProductResponse> => {
-    return apiRequest(`/import/product/${productCode}`, { method: 'POST' });
+    return apiRequest(`/import/product/${productCode}`, { method: "POST" });
   },
   update: (id: string, data: UpdateProductDto): Promise<ProductResponse> => {
-    return apiRequest(`/products/${id}`, { method: 'PUT', body: data });
+    return apiRequest(`/products/${id}`, { method: "PUT", body: data });
   },
   delete: (id: string): Promise<void> => {
-    return apiRequest(`/products/${id}`, { method: 'DELETE' });
+    return apiRequest(`/products/${id}`, { method: "DELETE" });
   },
   findRoutingsByProductId: (productId: string): Promise<RoutingResponse[]> => {
     return apiRequest(`/products/${productId}/routings`);
   },
   getDistinctComponentCodes: (productCode: string): Promise<string[]> => {
-    return apiRequest(`/products/${productCode}/distinct-component-codes`, { method: 'GET' });
+    return apiRequest(`/products/${productCode}/distinct-component-codes`, {
+      method: "GET",
+    });
   },
   importRouting: (productCode: string, file: File): Promise<any> => {
     const formData = new FormData();
-    formData.append('file', file);
-    return apiRequest(`/routings/import/product/${productCode}`, { method: 'POST', body: formData });
+    formData.append("file", file);
+    return apiRequest(`/routings/import/product/${productCode}`, {
+      method: "POST",
+      body: formData,
+    });
   },
 };
 
 // --- Serviço de Componentes ---
-export const componentService = {
-  findAllByProduct: (productId: string): Promise<ComponentResponse[]> => {
-    return apiRequest(`/components/product/${productId}`);
+export const reportService = {
+  // ... (função getEnergyHoursReport existente)
+
+  /**
+   * Busca o relatório de eficiência anual, quebrando por mês e etapa.
+   * @param year O ano do relatório (ex: 2024)
+   * @param processId (Opcional) Filtra o relatório para um único processo
+   */
+  getAnnualEfficiencyReport: (
+    year: number,
+    processId?: string,
+  ): Promise<AnnualEfficiencyReportDto[]> => {
+    // Constrói os query parameters
+    let endpoint = `/reports/annual-efficiency?year=${year}`;
+    if (processId) {
+      endpoint += `&processId=${processId}`;
+    }
+    return apiRequest(endpoint);
   },
 };

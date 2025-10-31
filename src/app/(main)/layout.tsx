@@ -1,57 +1,59 @@
-"use client";
+// src/app/(main)/layout.tsx
+'use client';
 
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter, usePathname } from 'next/navigation';
-import { useEffect, useState, useMemo } from 'react';
+// Imports de Hooks
+import { useState, useMemo, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext'; // Apenas o useAuth
+import { useProcesses } from '@/hooks/useProcesses'; // 1. IMPORTAMOS O useProcesses AQUI
+import { useRouter } from 'next/navigation';
+import { useTheme } from "next-themes";
+
+// Imports de Tipos
 import { ProcessResponse } from '@/types/process.types';
-import { useProcesses } from '@/hooks/useProcesses';
-import Link from 'next/link'; // Importe o componente Link
-import { Button } from '@/components/ui/button';
-import { LogOut, Sun, Moon, ChevronDown, ChevronRight, ListTree, Settings, PanelLeftOpen, PanelLeftClose, Search } from 'lucide-react';
-import { useTheme } from 'next-themes'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Input } from '@/components/ui/input';
 
-// Componente de Carregamento (Spinner)
+// Imports de Componentes e Ícones
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  PanelLeftClose, PanelLeftOpen, ChevronDown, ChevronRight, Search,
+  ListTree, Settings, LogOut, Moon, Sun
+} from 'lucide-react';
+
+// --- COMPONENTE SPINNER ---
 function LoadingSpinner() {
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-foreground"></div>
+    <div className="flex items-center justify-center h-screen bg-background">
+      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
     </div>
   );
 }
 
+// --- COMPONENTE SIDEBAR ---
+// A Sidebar volta a receber 'processes' e 'isLoading' como props
 function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoading: boolean }) {
-  const { user, logout } = useAuth(); // Pegamos o 'user' para o perfil
-  const { setTheme, theme } = useTheme(); // Para o botão de tema
+  const { user, logout } = useAuth(); // Pegamos user/logout do Auth
+  const { setTheme, theme } = useTheme();
 
-  // Estado para controlar se a sidebar está colapsada
   const [isCollapsed, setIsCollapsed] = useState(false);
-  // Estado para controlar se o submenu Manufacturing está aberto
-  const [isManufacturingOpen, setIsManufacturingOpen] = useState(true); // Começa aberto
-  // Estado para o termo de busca
+  const [isManufacturingOpen, setIsManufacturingOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Filtra os processos baseado no searchTerm (otimizado com useMemo)
   const filteredProcesses = useMemo(() => {
-    if (!searchTerm) {
-      return processes;
-    }
+    if (!searchTerm) return processes;
     return processes.filter(p =>
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       String(p.stepNumber).includes(searchTerm)
     );
   }, [processes, searchTerm]);
 
-  // Filtra os menus principais (exemplo simples)
   const mainMenus = [
-    // Definimos nossos menus aqui para facilitar a filtragem
     { key: 'manufacturing', name: 'Manufacturing Steps', icon: ListTree, children: filteredProcesses },
-    { key: 'management', name: 'Management', icon: Settings, href: '/products', children: [] }, // Exemplo, adicione mais se precisar
-  ].filter(menu => menu.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    { key: 'management', name: 'Management', icon: Settings, href: '/products', children: [] },
+  ];
 
-  // Função para pegar as iniciais do nome do usuário
   const getUserInitials = (name: string | undefined): string => {
     if (!name) return '?';
     const names = name.split(' ');
@@ -75,7 +77,7 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
         </Button>
       </div>
 
-      {/* 2. Barra de Busca (visível apenas quando expandido) */}
+      {/* 2. Barra de Busca */}
       {!isCollapsed && (
         <div className="relative mb-4">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -92,13 +94,9 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
       <nav className="flex-1 space-y-2 overflow-y-auto">
         {mainMenus.map((menu) => (
           menu.key === 'manufacturing' ? (
-            // Submenu Colapsável para Manufacturing Steps
             <Collapsible key={menu.key} open={isManufacturingOpen} onOpenChange={setIsManufacturingOpen} className="space-y-1">
               <CollapsibleTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className={`w-full justify-start ${isCollapsed ? 'justify-center px-0' : ''}`}
-                >
+                <Button variant="ghost" className={`w-full justify-start ${isCollapsed ? 'justify-center px-0' : ''}`}>
                   <menu.icon className={`h-5 w-5 ${!isCollapsed ? 'mr-2' : ''}`} />
                   {!isCollapsed && <span>{menu.name}</span>}
                   {!isCollapsed && (isManufacturingOpen ? <ChevronDown className="h-4 w-4 ml-auto" /> : <ChevronRight className="h-4 w-4 ml-auto" />)}
@@ -106,35 +104,30 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
               </CollapsibleTrigger>
               {!isCollapsed && (
                 <CollapsibleContent className="pl-6 space-y-1">
+                  {/* Usamos o 'isLoading' que veio das props */}
                   {isLoading ? (
                     <p className="text-xs text-muted-foreground py-2">Loading steps...</p>
                   ) : (
-                    menu.children.map((process) => (
+                    filteredProcesses.map((process) => (
                       <Link
                         key={process.id}
                         href={`/processes/${process.id}`}
                         className="w-full flex items-center p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-sm"
-                        title={`${process.stepNumber}. ${process.name.replace(/_/g, ' ')}`} // Tooltip para nome completo
+                        title={`${process.stepNumber}. ${process.name.replace(/_/g, ' ')}`}
                       >
-                         {/* Poderia adicionar um ícone genérico aqui se quisesse */}
                          <span className='truncate'>{`${process.stepNumber}. ${process.name.replace(/_/g, ' ')}`}</span>
                       </Link>
                     ))
                   )}
-                  {/* Mensagem se o filtro não encontrar nada */}
-                  {!isLoading && menu.children.length === 0 && searchTerm && (
+                  {!isLoading && filteredProcesses.length === 0 && searchTerm && (
                      <p className="text-xs text-muted-foreground py-2 text-center">No steps found.</p>
                   )}
                 </CollapsibleContent>
               )}
             </Collapsible>
           ) : (
-            // Item de Menu Normal (Ex: Management/Products)
             <Link key={menu.key} href={menu.href || '#'} title={menu.name}>
-              <Button
-                variant="ghost"
-                className={`w-full justify-start ${isCollapsed ? 'justify-center px-0' : ''}`}
-              >
+              <Button variant="ghost" className={`w-full justify-start ${isCollapsed ? 'justify-center px-0' : ''}`}>
                 <menu.icon className={`h-5 w-5 ${!isCollapsed ? 'mr-2' : ''}`} />
                 {!isCollapsed && <span>{menu.name}</span>}
               </Button>
@@ -145,7 +138,6 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
 
       {/* 4. Rodapé com Perfil e Logout */}
       <div className={`mt-auto pt-4 border-t border-border ${isCollapsed ? 'space-y-2' : ''}`}>
-        {/* Botão de Tema (Opcional) */}
         <Button
             variant="ghost"
             className={`w-full justify-start ${isCollapsed ? 'justify-center px-0' : ''}`}
@@ -155,10 +147,8 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
             {theme === "dark" ? ( <Sun className={`h-5 w-5 ${!isCollapsed ? 'mr-2' : ''}`} /> ) : ( <Moon className={`h-5 w-5 ${!isCollapsed ? 'mr-2' : ''}`} /> )}
             {!isCollapsed && <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>}
         </Button>
-        {/* Perfil do Usuário */}
         <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'p-2'}`}>
            <Avatar className="h-8 w-8">
-             {/* <AvatarImage src={user?.avatarUrl} alt={user?.name} /> */}
              <AvatarFallback>{getUserInitials(user?.name)}</AvatarFallback>
            </Avatar>
            {!isCollapsed && (
@@ -168,7 +158,6 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
              </div>
            )}
         </div>
-        {/* Botão de Logout */}
         <Button
           variant="ghost"
           className={`w-full justify-start ${isCollapsed ? 'justify-center px-0' : ''}`}
@@ -183,39 +172,40 @@ function Sidebar({ processes, isLoading }: { processes: ProcessResponse[]; isLoa
   );
 }
 
+// --- COMPONENTE MAINLAYOUT ---
 export default function MainLayout({ children }: { children: React.ReactNode }) {
+  // 1. O Layout protegido pega o status de autenticação
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
   
-  // 2. Use o hook para buscar os processos e seu estado de carregamento
+  // 2. O Layout protegido chama o hook para buscar os dados DA SIDEBAR
   const { processes, loading: areProcessesLoading } = useProcesses();
 
+  // 3. Efeito de Proteção de Rota
   useEffect(() => {
-    // Evita empurrar para /login se já estamos na própria rota de login
     if (!isAuthLoading && !isAuthenticated) {
-      if (pathname !== '/login') {
-        router.replace('/login');
-      }
+      router.push('/login');
     }
-    // A lógica de fetchProcesses foi movida para dentro do hook, então não é mais necessária aqui.
-  }, [isAuthLoading, isAuthenticated, router, pathname]);
+  }, [isAuthLoading, isAuthenticated, router]);
 
+  // Enquanto o AuthContext verifica a sessão, mostramos um spinner
   if (isAuthLoading) {
     return <LoadingSpinner />;
   }
 
+  // Se estiver autenticado, renderiza o layout com a sidebar
   if (isAuthenticated) {
     return (
-      <div className="flex h-screen">
-        {/* 3. Passe os dados reais e o estado de carregamento para o Sidebar */}
+      <div className="flex h-screen bg-background">
+        {/* 4. Passa os dados dos processos para a Sidebar */}
         <Sidebar processes={processes} isLoading={areProcessesLoading} />
-        <main className="flex-1 p-8 bg-background overflow-y-auto">
+        <main className="flex-1 p-8 overflow-y-auto">
           {children}
         </main>
       </div>
     );
   }
 
+  // Se não estiver autenticado (e não estiver carregando), retorna nulo (e o useEffect redireciona)
   return null;
 }
